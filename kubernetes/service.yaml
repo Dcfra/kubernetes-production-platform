@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: platform-health-api
+  namespace: platform-demo
+spec:
+  selector:
+    app: platform-health-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP
