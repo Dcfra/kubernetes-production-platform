@@ -5,7 +5,7 @@ A hands-on portfolio project demonstrating cloud-native application delivery, Ku
 ## What this project demonstrates
 
 - Containerizing a small Python Flask health API with Docker
-- Deploying the app to Kubernetes with Deployment, Service, and HorizontalPodAutoscaler manifests
+- Deploying the app to Kubernetes with Deployment, Service, probes, resource controls, and HorizontalPodAutoscaler manifests
 - Validating application behavior with pytest
 - Running automated tests and Docker build checks with GitHub Actions
 - Providing an AWS EKS Terraform starter configuration for review and extension
@@ -15,11 +15,11 @@ A hands-on portfolio project demonstrating cloud-native application delivery, Ku
 ## Repository layout
 
 ```text
-app/                    Flask application and Dockerfile
+app/                     Flask application and Dockerfile
 kubernetes/              Kubernetes namespace, deployment, service, HPA
-terraform/eks/           AWS EKS Terraform starter
- tests/                  Unit tests
-.github/workflows/       CI workflow
+terraform/eks/            AWS EKS Terraform starter
+tests/                   Unit tests
+.github/workflows/        CI workflow
 docs/                    Architecture and troubleshooting notes
 ```
 
@@ -43,7 +43,7 @@ curl http://127.0.0.1:8080/health
 Run tests:
 
 ```bash
-pip install pytest
+pip install -r app/requirements.txt
 pytest -q
 ```
 
@@ -60,7 +60,8 @@ docker run --rm -p 8080:8080 platform-health-api:local
 kind create cluster --name platform-demo
 docker build -t platform-health-api:local -f app/Dockerfile .
 kind load docker-image platform-health-api:local --name platform-demo
-kubectl apply -f kubernetes/
+kubectl apply -f kubernetes/namespace.yaml
+kubectl apply -f kubernetes/deployment.yaml -f kubernetes/service.yaml -f kubernetes/hpa.yaml
 kubectl -n platform-demo rollout status deployment/platform-health-api
 kubectl -n platform-demo port-forward service/platform-health-api 8080:80
 ```
@@ -69,7 +70,7 @@ Then check `http://127.0.0.1:8080/health`. The HPA needs Metrics Server to repor
 
 ## Terraform
 
-Review `terraform/eks/` before use. EKS can incur AWS charges. Configure credentials, inspect the plan, and explicitly approve any `terraform apply`. Never commit credentials, state files, or secret values.
+Review `terraform/eks/` before use. The configuration expects an existing VPC and private subnets. EKS can incur AWS charges. Configure credentials, inspect the plan, and explicitly approve any `terraform apply`. Never commit credentials, state files, or secret values.
 
 ## Evidence and screenshots
 
